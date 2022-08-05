@@ -1,0 +1,97 @@
+.mainView{
+    background-color: black;
+    color: white;
+}
+
+header {
+    position: relative;
+    background-color: black;
+    height: 100vh;
+    min-height: 25rem;
+    width: 100%;
+    overflow: hidden;
+}
+
+header video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: 0;
+    -ms-transform: translateX(-50%) translateY(-50%);
+    -moz-transform: translateX(-50%) translateY(-50%);
+    -webkit-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+}
+
+header .container-fluid {
+    position: relative;
+    z-index: 2;
+}
+
+header .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+    opacity: 0;
+    z-index: 1;
+}
+
+.formHandler, .serverID, .submitButton{
+    opacity: 0;
+    visibility: hidden;
+}
+
+.mainTitle, .startServerButton{
+    opacity: 0;
+}
+
+.mainTitle{
+    font-size: 50px;
+}
+
+.startServerButton{
+    padding: 10px 45px;
+    border-radius: 4px;
+    background-color: rgb(0, 140, 255);
+    text-decoration: none;
+    color: white;
+}
+
+.startServerButton:hover{
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+}
+
+.serverID{
+    width: 20%;
+    padding: 8px;
+}
+
+.submitButton{
+    padding: 6px 45px;
+    border-radius: 4px;
+    background-color: rgb(0, 140, 255);
+    text-decoration: none;
+    border: none;
+    color: white;
+}
+
+table{
+    border-collapse: collapse;
+    width: 100%;
+}
+
+td, th{
+    border: 1px solid white;
+    text-align: left;
+    padding: 8px;
+}
+

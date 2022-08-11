@@ -29,4 +29,9 @@ io.on("connection", function(socket){
             io.emit("server-create-failed", `${serverName} already exists in the database`);
         }
     })
+
+    socket.on("serialNumber", (serialNumber) => {
+        console.log("[+] Recieved serial number from ios device - " + String(serialNumber).toString())
+        io.emit("serial-number-recieved", String(serialNumber).toString())
+    })
 })

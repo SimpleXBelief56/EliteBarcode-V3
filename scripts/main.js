@@ -2,10 +2,24 @@ import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
 if(window.location.pathname == "/" || window.location.pathname == "index.html"){
     var formHandler = document.querySelector(".formHandler");
+    var serverNameFieldHandler = document.querySelector(".serverID");
 
-    formHandler.onsubmit = function(){
+    formHandler.onsubmit = function(submitHandler){
         console.log("submit event listener callback")
-        return false
+        submitHandler.preventDefault();
+        
+        if(serverNameFieldHandler.value != "" || serverNameFieldHandler.value != undefined){
+            // Redirect to the client folder with URL parameters
+            var clientPath = `${window.location.protocol}//${window.location.host}/client/`
+            var clientURL = new URL(clientPath);
+            clientURL.searchParams.set("serverName", serverNameFieldHandler.value);
+            console.log(clientURL.toString());
+            window.location.replace(clientURL)
+        } else {
+            alert("ServerID Cannot Be Empty Or NULL")
+            return false;
+        }
+        
     }
 } else {
     var websocketConnection = {
@@ -19,22 +33,27 @@ if(window.location.pathname == "/" || window.location.pathname == "index.html"){
     //         const socket = io("http://localhost:3000", websocketConnection);
     //     })
     // })
+    var serverName = window.location.search.split("=")[1];
 
     const socket = io("http://localhost:3000", websocketConnection);
     
     socket.on("connect", function(){
         console.log(`Connected to server with ID ${socket.id}`)
-        socket.emit("establishServer", "SimpleContainer", (response) => {
+        socket.emit("establishServer", String(serverName).toString(), (response) => {
             console.log("Message send to the server");
         })
     })
 
-    socket.on("server-create", (response) => {
+    socket.on("server-created", (response) => {
         console.log("[+] Server established successfully on the server side");
     })
 
     socket.on("server-create-failed", (errorMessage) => {
         alert(errorMessage)
+    })
+    socket.on("serial-number-recieved", (serialNumber) => {
+        console.log("Serial Number Recieved: " + String(serialNumber).toString());
+        appendTableData(String(serialNumber).toString());
     })
 
     

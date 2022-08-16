@@ -1,5 +1,9 @@
 import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 
+function wait(ms){
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 if(window.location.pathname == "/" || window.location.pathname == "index.html"){
     var formHandler = document.querySelector(".formHandler");
     var serverNameFieldHandler = document.querySelector(".serverID");
@@ -27,25 +31,45 @@ if(window.location.pathname == "/" || window.location.pathname == "index.html"){
     }
     
     
-    
     // $(document).ready(function(){
     //     $(".submitButton").click(function(){
     //         const socket = io("http://localhost:3000", websocketConnection);
     //     })
     // })
     var serverName = window.location.search.split("=")[1];
+    var status = document.querySelector(".loaderStatus");
 
-    const socket = io("http://localhost:3000", websocketConnection);
+    changeStatus("Connecting To Server");
+    await wait(5000);
+
+    const socket = io("https://elitebarcodeserver.ngrok.io", websocketConnection);
     
     socket.on("connect", function(){
         console.log(`Connected to server with ID ${socket.id}`)
+        changeStatus("Establishing Container");
         socket.emit("establishServer", String(serverName).toString(), (response) => {
             console.log("Message send to the server");
         })
     })
 
-    socket.on("server-created", (response) => {
+    socket.on("server-created", async (response) => {
         console.log("[+] Server established successfully on the server side");
+        changeStatus("Container Established");
+        await wait(2500);
+        changeStatus("Configuring Container");
+        var containerName = document.querySelector(".containerName");
+        containerName.innerHTML = getServerName();
+        await wait(2500);
+        changeStatus("Configuration Complete");
+        await wait(2500);
+        $(".loader").animate({opacity: 0}, 400).promise().done(function(){
+            $(".loaderStatus").animate({opacity: 0}, 400).promise().done(function(){
+                $(".loaderView").animate({opacity: 0}, 800).promise().done(function(){
+                    document.querySelector(".loaderView").style.visibility = "hidden";
+                });
+            })
+        })
+        
     })
 
     socket.on("server-create-failed", (errorMessage) => {
@@ -61,7 +85,7 @@ if(window.location.pathname == "/" || window.location.pathname == "index.html"){
 
 
 function appendTableData(serialNumberParam){
-    var tableHandler = document.querySelector(".tableHandler");
+    var tableHandler = document.querySelector(".dataSection");
     var row = tableHandler.insertRow(-1);
 
     // var manufacturerField = document.querySelector(".manufacturerField").value;
@@ -78,10 +102,45 @@ function appendTableData(serialNumberParam){
     var model = row.insertCell(-1);
     var fundingSource = row.insertCell(-1);
 
-    serialNumber.innerHTML = String(serialNumberParam).toString();
-    manufacturer.innerHTML = manufacturerField;
+    serialNumber.innerHTML = format(serialNumberParam);
+    manufacturer.innerHTML = String(manufacturerField).toString().charAt(0).toUpperCase() + String(manufacturerField).toString().slice(1);
     model.innerHTML = modelField;
     fundingSource.innerHTML = fundingSourceField;
     
+}
+
+function format(serialNumber){
+    var checkboxes = document.querySelectorAll("#flexSwitchCheckChecked");
+    var removeEightCharacters = checkboxes[0].checked;
+    var removeFirstCharacter = checkboxes[1].checked;
+
+    if(removeEightCharacters){
+        serialNumber = String(serialNumber).toString().substring(0, 7);   
+    }
+    if(removeFirstCharacter){
+        serialNumber = String(serialNumber).toString().slice(1);
+    }
+
+    return serialNumber;
+}
+
+function getServerName(){
+    var searchParams = window.location.search;
+    var urlParams = new URLSearchParams(searchParams);
+    return String(urlParams.get("serverName")).toString();
+}
+
+function exportToCSV(){
+    TableExport(document.querySelector(".tableHandler"), {
+        filename: "EliteBarcodeV2-Exports",
+        sheetname: getServerName()
+    })
+}
+
+function changeStatus(next){
+    $(".loaderStatus").animate({opacity: 0}, 400).promise().done(function(){
+        document.querySelector(".loaderStatus").innerHTML = next;
+        $(".loaderStatus").animate({opacity: 1}, 400);
+    })
 }
 

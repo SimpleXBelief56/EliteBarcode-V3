@@ -1,6 +1,6 @@
 const io = require("socket.io")(3000, {
     cors: {
-        origin: ["http://localhost:3000", "http://localhost:5500"]
+        origin: ["http://localhost:3000", "http://localhost:5500", "https://elitebarcode.ngrok.io"]
     }
 })
 
@@ -16,17 +16,30 @@ const io = require("socket.io")(3000, {
 const establishedServers = [];
 
 
-io.on("connection", function(socket){
+
+io.on("connection", async function(socket){
     console.log(socket.id);
 
-    socket.on("establishServer", (serverName) => {
+    socket.on("establishServer", async (serverName) => {
         console.log("[+] Establish server with server name " + String(serverName).toString());
         // establishedServers.push(serverName);
         // console.log(establishedServers);
         if(!establishedServers.includes(serverName)){
-            io.emit("server-created", "server-created-200")
+            socket.join(serverName);
+            // establishedServers.push(serverName);
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            io.emit("server-created", "server-created-200");
         } else {
             io.emit("server-create-failed", `${serverName} already exists in the database`);
+        }
+    })
+
+    socket.on("joinServer", (serverName) => {
+        if(establishedServers.includes(serverName)){
+            socket.join(serverName);
+            io.emit("server-joined", "server-joined-200");
+        } else {
+            io.emit("server-join-error", "server-not-found");
         }
     })
 

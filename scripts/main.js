@@ -43,6 +43,16 @@ if(window.location.pathname == "/" || window.location.pathname == "index.html"){
     await wait(5000);
 
     const socket = io("https://elitebarcodeserver.ngrok.io", websocketConnection);
+
+    socket.on("connect_error", function(){
+        // Connection Failed
+        $(".loader").animate({opacity: 0}, 400);
+        changeStatus("Connection Failed");
+        setTimeout(function(){
+            window.location.href = "/"
+        }, 1200);
+        return;
+    })
     
     socket.on("connect", function(){
         console.log(`Connected to server with ID ${socket.id}`)
@@ -138,9 +148,11 @@ function exportToCSV(){
 }
 
 function changeStatus(next){
-    $(".loaderStatus").animate({opacity: 0}, 400).promise().done(function(){
-        document.querySelector(".loaderStatus").innerHTML = next;
-        $(".loaderStatus").animate({opacity: 1}, 400);
-    })
+    if(document.querySelector(".loaderStatus").innerHTML !== next){
+        $(".loaderStatus").animate({opacity: 0}, 400).promise().done(function(){
+            document.querySelector(".loaderStatus").innerHTML = next;
+            $(".loaderStatus").animate({opacity: 1}, 400);
+        })
+    }
 }
 
